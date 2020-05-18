@@ -1,0 +1,233 @@
+---
+- name: "Load a variable file based on the OS type, or a default if not found"
+  include_vars: "{{ item }}"
+  with_first_found:
+      - "{{ ansible_distribution }}.yml"
+      - "{{ ansible_os_family }}.yml"
+      - "{{ ansible_distribution }}_{{ ansible_distribution_version }}.yml"
+      - default.yml
+
+- name: "Install system packages"
+  package:
+    name: '{{ system_packages }}'
+    use: '{{ ansible_pkg_mgr }}'
+    state: present
+
+# foreman
+- name: install postgresql repository
+  package:
+    name: "{{ foreman_postgresql_repo }}"
+    state: present
+  when: foreman_postgresql_repo_manage
+  changed_when: false
+
+- name: install postgresql
+  import_role:
+    name: geerlingguy.postgresql
+  vars:
+    postgresql_packages:
+      - "postgresql{{ foreman_postgresql_release }}"
+      - "postgresql{{ foreman_postgresql_release }}-server"
+      - "postgresql{{ foreman_postgresql_release }}-contrib"
+      - "postgresql{{ foreman_postgresql_release }}-libs"
+    postgresql_bin_path: "/usr/pgsql-{{ foreman_postgresql_release }}/bin"
+    postgresql_daemon: "postgresql-{{ foreman_postgresql_release }}"
+    postgresql_data_dir: "{{ foreman_postgresql_data_dir }}"
+    postgresql_config_path: "{{ foreman_postgresql_config_path }}"
+    postgresql_users:
+      - name: "{{ foreman_db_user }}"
+        password: "{{ foreman_db_pass }}"
+        encrypted: yes
+    postgresql_databases:
+      - name: "{{ foreman_db_name }}"
+        owner: "{{ foreman_db_user }}"
+    postgresql_hba_entries:
+      - type: local
+        database: all
+        user: postgres
+        auth_method: peer
+      - type: local
+        database: replication
+        user: postgres
+        auth_method: peer
+      - type: local
+        database: all
+        user: all
+        auth_method: peer
+      - type: host
+        database: all
+        user: postgres
+        address: 0.0.0.0/0
+        auth_method: reject
+      - type: host
+        database: all
+        user: all
+        address: '127.0.0.1/32'
+        auth_method: md5
+      - type: host
+        database: all
+        user: all
+        address: '::1/128'
+        auth_method: md5
+    postgresql_global_config_options:
+      - option: listen_addresses
+        value: localhost
+      - option: wal_level
+        value: replica
+      - option: max_wal_senders
+        value: 5
+      - option: restore_command
+        value: 'cp /mnt/server/archivedir/%f %p'
+
+- name: remove postgresql repository
+  package:
+    name: pgdg-redhat-repo-*
+    state: absent
+  when: foreman_postgresql_repo_manage
+  changed_when: false
+
+- name: configure hosts file
+  lineinfile:
+    path: /etc/hosts
+    backup: yes
+    firstmatch: yes
+    line: '127.0.0.1 {{ inventory_hostname }} localhost localhost.localdomain localhost4 localhost4.localdomain4'
+    regexp: "^127.0.0.1"
+  when: foreman_hosts_manage | bool
+
+- name: install foreman installer
+  package:
+    name: "{{ foreman_installer_package }}"
+    state: "{{ foreman_installer_state }}"
+  tags:
+    - install
+
+- name: install foreman
+  command: "{{ foreman_installer_command }} {{ foreman_installer_options | join(' ') }} {{ foreman_installer_extra_options | join(' ') }}"
+  changed_when: false
+  tags:
+    - install
+
+- name: install pip requirements
+  pip:
+    name: apypie
+
+- name: query foreman users
+  uri:
+    url: "{{ foreman_url }}/api/users"
+    method: GET
+    body_format: json
+    body:
+      per_page: "{{ foreman_api_allpages }}"
+    force_basic_auth: yes
+    user: "{{ foreman_admin_user }}"
+    password: "{{ foreman_admin_pass }}"
+    validate_certs: no
+  register: foreman_user_query
+  ignore_errors: yes
+
+- block:
+
+    - name: rake permissions:reset
+      command: /usr/sbin/foreman-rake permissions:reset
+      register: handler_permissions_reset
+
+    - name: override admin credentials
+      set_fact:
+        foreman_permissions_reset: true
+        reset_admin_user: "{{ ((handler_permissions_reset.stdout | split_with(' '))[3])[0:-1] }}"
+        reset_admin_pass: "{{ (handler_permissions_reset.stdout | split_with(' '))[5] }}"
+
+    - name: query foreman users
+      uri:
+        url: "{{ foreman_url }}/api/users"
+        method: GET
+        body_format: json
+        body:
+          per_page: "{{ foreman_api_allpages }}"
+        force_basic_auth: yes
+        user: "{{ reset_admin_user }}"
+        password: "{{ reset_admin_pass }}"
+        validate_certs: no
+      register: foreman_reset_query
+
+    - name: set admin user facts
+      set_fact:
+        foreman_admin: "{{ foreman_reset_query.json.results | selectattr('login', 'equalto', foreman_admin_user) |  first }}"
+        foreman_reset:
+          password: "{{ foreman_admin_pass }}"
+
+    - name: set admin foreman password
+      uri:
+        url: "{{ foreman_url }}/api/users/{{ foreman_admin.id }}"
+        method: PUT
+        body_format: json
+        body:
+          user:
+            current_password: "{{ reset_admin_pass }}"
+            password: "{{ foreman_admin_pass }}"
+            password_confirmation: "{{ foreman_admin_pass }}"
+        force_basic_auth: yes
+        user: "{{ reset_admin_user }}"
+        password: "{{ reset_admin_pass }}"
+        validate_certs: no
+
+  when: foreman_user_query is failed
+
+- name: install puppet agent module
+  command: /opt/puppetlabs/bin/puppet module install puppetlabs-puppet_agent
+  changed_when: false
+
+- name: upgrade puppet agent module
+  command: /opt/puppetlabs/bin/puppet module upgrade puppetlabs-puppet_agent
+  changed_when: false
+
+- name: create autosign file
+  file:
+    state: touch
+    path: /etc/puppetlabs/puppet/autosign.conf
+    owner: puppet
+    group: puppet
+    mode: 0664
+  changed_when: false
+
+- name: create backup binary file
+  template:
+    src: backup.sh.j2
+    dest: "{{ foreman_backup_bin }}"
+    mode: 0755
+  tags:
+    - backup
+
+- name: create backup cronjob
+  cron:
+    name: FOREMAN_BACKUP
+    job: "{{ foreman_backup_bin }}"
+    special_time: hourly
+  tags:
+    - backup
+
+- name: create restore binary file
+  template:
+    src: restore.sh.j2
+    dest: "{{ foreman_restore_bin }}"
+    mode: 0755
+  vars:
+    postgresql_data_dir: "{{ foreman_postgresql_data_dir }}"
+  tags:
+    - restore
+
+- name: create motd banners
+  lineinfile:
+    path: /etc/motd
+    line: "{{ item.line }}"
+    regexp: "{{ item.regexp }}"
+    create: yes
+  loop:
+    - regexp: ".*{{ foreman_backup_bin }}.*"
+      line: run sudo {{ foreman_backup_bin }} to perform an unscheduled foreman backup
+    - regexp: ".*{{ foreman_restore_bin }}.*"
+      line: run sudo {{ foreman_restore_bin }} to restore a foreman to the latest available backup
+  tags:
+    - backup
+    - restore
