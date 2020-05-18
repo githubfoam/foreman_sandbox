@@ -58,11 +58,9 @@ Vagrant.configure("2") do |config|
     ansible.version = "2.9.7"
     end
     # webtier.vm.provision "shell", inline: <<-SHELL
-    # sudo yum install -y https://yum.puppet.com/puppet6-release-el-7.noarch.rpm
-    # sudo yum install -y http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm #Error: Nothing to do
+    # sudo yum install -y https://yum.puppet.com/puppet6-release-el-7.noarch.rpm    
     # sudo yum install -y https://yum.theforeman.org/releases/2.0/el7/x86_64/foreman-release.rpm
-    # sudo yum install -y foreman-release-scl
-    # sudo yum install -y foreman-installer
+    # sudo yum install -y foreman-release-scl foreman-installer
     # sudo foreman-installer
     # SHELL
   end
