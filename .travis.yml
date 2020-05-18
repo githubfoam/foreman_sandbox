@@ -72,6 +72,15 @@ fleet_script_vagrant_tasks : &fleet_script_vagrant_tasks
           - sudo vagrant box add "bento/centos-7.7" --provider=virtualbox
           - sudo vagrant mutate "bento/centos-7.7" libvirt
           - sudo vagrant up --provider=libvirt vg-foremansrv01
+          - sudo vagrant box add "bento/centos-8.1" --provider=virtualbox
+          - sudo vagrant mutate "bento/centos-8.1" libvirt
+          - sudo vagrant up --provider=libvirt vg-foremansrv02
+          - sudo vagrant box add "bento/ubuntu-20.04" --provider=virtualbox
+          - sudo vagrant mutate "bento/ubuntu-20.04" libvirt
+          - sudo vagrant up --provider=libvirt vg-foremansrv03
+          - sudo vagrant box add "bento/debian-9.12" --provider=virtualbox
+          - sudo vagrant mutate "bento/debian-9.12" libvirt
+          - sudo vagrant up --provider=libvirt vg-foremansrv04                          
           - sudo vagrant box list #veridy installed boxes
           - sudo vagrant status #Check the status of the VMs to see that none of them have been created yet
           # - sudo vagrant up --provider=libvirt vg-irods01
