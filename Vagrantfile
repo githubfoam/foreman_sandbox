@@ -1,122 +1,51 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-# https://www.theforeman.org/manuals/1.22/quickstart_guide.html
+Vagrant.require_version ">= 1.6.0"
+VAGRANTFILE_API_VERSION = "2"
+# YAML module for reading box configurations.
+require 'yaml'
+#  server configs from YAML/YML file
+servers_list = YAML.load_file(File.join(File.dirname(__FILE__), 'provisioning/servers_list.yml'))
 
-Vagrant.configure("2") do |config|
-  config.vm.provider "virtualbox" do |vb|
-    vb.gui = false
-    vb.memory = "4096"
-    vb.cpus = 2
-  end
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+ # Disable updates
+ config.vm.box_check_update = false
 
-  # config.vm.define "foremansrv01" do |webtier|
-  #   webtier.vm.box = "bento/scientific-7.6"
-  #   # webtier.vm.box = "bento/centos-7.6" # OK
-  #   webtier.vm.hostname = "foremansrv01"
-  #   webtier.vm.network "private_network", ip: "192.168.45.20"
-  #   webtier.vm.network "forwarded_port", guest: 8443, host: 8443
-  #   webtier.vm.provider "virtualbox" do |vb|
-  #       vb.name = "foremansrv01"
-  #   end
-  #   webtier.vm.provision "ansible_local" do |ansible|
-  #   ansible.playbook = "deploy.yml"
-  #   ansible.become = true
-  #   ansible.compatibility_mode = "2.0"
-  #   ansible.version = "2.9.7"
-  #   end
-  #   webtier.vm.provision "shell", inline: <<-SHELL
-  #   sudo yum -y install https://yum.puppet.com/puppet6-release-el-7.noarch.rpm
-  #   sudo yum -y install http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-  #   sudo yum -y install https://yum.theforeman.org/releases/2.0/el7/x86_64/foreman-release.rpm
-  #   sudo yum -y install foreman-release-scl
-  #   sudo yum -y install foreman-installer
-  #   sudo foreman-installer
-  #   # yum -y install https://yum.puppet.com/puppet6-release-el-7.noarch.rpm
-  #   # yum -y install http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-  #   # yum -y install https://yum.theforeman.org/releases/1.22/el7/x86_64/foreman-release.rpm
-  #   # yum -y install foreman-installer
-  #   # foreman-installer
-  #   # echo "foremansrv01 up && browse https://192.168.45.20"
-  #   SHELL
-  # end
+      servers_list.each do |server|
+        config.vm.define server["vagrant_box_host"] do |box|
+          box.vm.box = server["vagrant_box"]
+          box.vm.hostname = server["vagrant_box_host"]
+          box.vm.network server["network_type"], ip: server["vagrant_box_ip"]
+          box.vm.network "forwarded_port", guest: server["guest_port"], host: server["host_port"]
+          box.vm.provider "virtualbox" do |vb|
+              vb.name = server["vbox_name"]
+              vb.memory = server["vbox_ram"]
+              vb.cpus = server["vbox_cpu"]
+              vb.gui = false
+              vb.customize ["modifyvm", :id, "--groups", "/zeek-sandbox"] # create vbox group
+          end # end of box.vm.providers
 
-  config.vm.define "foremansrv01" do |webtier|
-    # webtier.vm.box = "bento/scientific-7.6" # OK
-    webtier.vm.box = "bento/centos-7.7" # OK
-    webtier.vm.hostname = "foremansrv01"
-    webtier.vm.network "private_network", ip: "192.168.43.192"
-    webtier.vm.network "forwarded_port", guest: 8443, host: 8443
-    webtier.vm.provider "virtualbox" do |vb|
-        vb.name = "foremansrv01"
-        vb.memory = "4096"
-    end
-    webtier.vm.provision "ansible_local" do |ansible|
-    ansible.playbook = "deploy.yml"
-    ansible.become = true
-    ansible.compatibility_mode = "2.0"
-    ansible.version = "2.9.7"
-    end
-    # webtier.vm.provision "shell", inline: <<-SHELL
-    # sudo yum install -y https://yum.puppet.com/puppet6-release-el-7.noarch.rpm
-    # sudo yum install -y http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm #Error: Nothing to do
-    # sudo yum install -y https://yum.theforeman.org/releases/2.0/el7/x86_64/foreman-release.rpm
-    # sudo yum install -y foreman-release-scl
-    # sudo yum install -y foreman-installer
-    # sudo foreman-installer
-    # SHELL
-  end
+          box.vm.provision "ansible_local" do |ansible|
+              # ansible.compatibility_mode = "2.0"
+              ansible.compatibility_mode = server["ansible_compatibility_mode"]
+              ansible.version = server["ansible_version"]
+              ansible.playbook = server["server_bootstrap"]
+              # ansible.inventory_path = 'provisioning/hosts'
+              # ansible.verbose = "vvvv" # debug
+           end # end if box.vm.provision
+           box.vm.provision "shell", path: server["shell_provision"]
+           # box.vm.provision "shell", inline: <<-SHELL
+           #  echo "===================================================================================="
+           #                            hostnamectl status
+           #  echo "===================================================================================="
+           #  echo "         \   ^__^                                                                  "
+           #  echo "          \  (oo)\_______                                                          "
+           #  echo "             (__)\       )\/\                                                      "
+           #  echo "                 ||----w |                                                         "
+           #  echo "                 ||     ||                                                         "
+           #  SHELL
 
-  # config.vm.define "client1" do |webtier|
-  #   webtier.vm.box = "bento/centos-7.7" # OK
-  #   webtier.vm.hostname = "client1"
-  #   webtier.vm.network "private_network", ip: "192.168.43.11"
-  #   webtier.vm.network "forwarded_port", guest: 8443, host: 8443
-  #   webtier.vm.provider "virtualbox" do |vb|
-  #       vb.name = "foremansrv01"
-  #   end
-  #   webtier.vm.provision "ansible_local" do |ansible|
-  #   ansible.playbook = "deploy.yml"
-  #   ansible.become = true
-  #   ansible.compatibility_mode = "2.0"
-  #   ansible.version = "2.9.7"
-  #   end
-  #   webtier.vm.provision "shell", inline: <<-SHELL
-  #   echo "===================================================================================="
-  #                         hostnamectl status
-  #   echo "===================================================================================="
-  #   echo "         \   ^__^                                                                  "
-  #   echo "          \  (oo)\_______                                                          "
-  #   echo "             (__)\       )\/\                                                      "
-  #   echo "                 ||----w |                                                         "
-  #   echo "                 ||     ||                                                         "
-  #   SHELL
-  # end
-  #
-  # config.vm.define "client2" do |webtier|
-  #   webtier.vm.box = "bento/ubuntu-19.10"
-  #   webtier.vm.hostname = "client2"
-  #   webtier.vm.network "private_network", ip: "192.168.43.20"
-  #   webtier.vm.network "forwarded_port", guest: 8443, host: 8443
-  #   webtier.vm.provider "virtualbox" do |vb|
-  #       vb.name = "foremansrv01"
-  #   end
-  #   webtier.vm.provision "ansible_local" do |ansible|
-  #   ansible.playbook = "deploy.yml"
-  #   ansible.become = true
-  #   ansible.compatibility_mode = "2.0"
-  #   ansible.version = "2.9.7"
-  #   end
-  #   webtier.vm.provision "shell", inline: <<-SHELL
-  #   echo "===================================================================================="
-  #                         hostnamectl status
-  #   echo "===================================================================================="
-  #   echo "         \   ^__^                                                                  "
-  #   echo "          \  (oo)\_______                                                          "
-  #   echo "             (__)\       )\/\                                                      "
-  #   echo "                 ||----w |                                                         "
-  #   echo "                 ||     ||                                                         "
-  #   SHELL
-  # end
-
-end
+        end # end of config.vm
+      end  # end of servers_list.each loop
+end # end of Vagrant.configure

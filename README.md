@@ -24,5 +24,5 @@ foremansrv01:   Success!
 FQDN
 http://manpages.ubuntu.com/manpages/trusty/en/man1/hostname.1.html
 Quickstart Guide
-https://www.theforeman.org/manuals/1.22/quickstart_guide.html
+https://www.theforeman.org/manuals/2.0/quickstart_guide.html
 ~~~~
