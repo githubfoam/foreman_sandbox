@@ -82,11 +82,12 @@ fleet_script_vagrant_tasks : &fleet_script_vagrant_tasks
           - sudo vagrant global-status
           - echo "============================================="
           - sudo vagrant ssh -c "hostnamectl"
-          - echo "============================================="          
+          - echo "============================================="
           - sudo vagrant ssh foremansrv01 -c "sudo yum -y install https://yum.puppet.com/puppet6-release-el-7.noarch.rpm"
           - sudo vagrant ssh foremansrv01 -c "sudo yum -y install https://yum.theforeman.org/releases/2.0/el7/x86_64/foreman-release.rpm"
           - sudo vagrant ssh foremansrv01 -c "sudo yum install -y foreman-release-scl foreman-installer"
-          - travis_wait 20 sudo vagrant ssh foremansrv01 -c "sudo foreman-installer"
+          # - travis_wait 20 sudo vagrant ssh foremansrv01 -c "sudo foreman-installer"
+          - sudo vagrant ssh foremansrv01 -c "sudo foreman-installer"
           - sudo vagrant ssh foremansrv01 -c "curl https://foremansrv01.local"
           # - sudo vagrant ssh -c "hostnamectl"
           - sudo virsh list --all #show all running KVM/libvirt VMs
@@ -180,20 +181,20 @@ matrix:
     #     - deactivate
 
 
-    # - name: "Python 2.7 on xenial"
-    #   dist: xenial
-    #   language: python
-    #   python: 2.7
-    #   before_install:
-    #     - pip install virtualenv
-    #     - virtualenv -p $(which python2) ~venvpy2
-    #     - source ~venvpy2/bin/activate
-    #   <<: *fleet_install_tasks
-    #   <<: *fleet_script_tasks
-    #   # <<: *fleet_script_vagrant_tasks
-    #   after_success:
-    #     - deactivate
-    #
+    - name: "Python 2.7 on xenial arm64"
+      dist: xenial
+      language: python
+      python: 2.7
+      before_install:
+        - pip install virtualenv
+        - virtualenv -p $(which python2) ~venvpy2
+        - source ~venvpy2/bin/activate
+      <<: *fleet_install_tasks
+      <<: *fleet_script_tasks
+      <<: *fleet_script_vagrant_tasks
+      after_success:
+        - deactivate
+
     # - name: "Python 3.7 on xenial arm64"
     #   os: linux
     #   arch: arm64
