@@ -14,14 +14,9 @@
 
 # - name: "Install docker-ce and docker-compose-ce"
 #   gather_facts: true
-#   hosts:  vg-docker-01
+#   hosts:  vg-foremansrv01
 #   become: yes
+#   vars:
+#     foreman_db_pass: supersecret
 #   roles:
-#     - docker-compose
-#
-# - name: "Install docker-ce and docker-compose-ce"
-#   gather_facts: true
-#   hosts:  vg-docker-03
-#   become: yes
-#   roles:
-#     - docker-compose
+#     - foreman

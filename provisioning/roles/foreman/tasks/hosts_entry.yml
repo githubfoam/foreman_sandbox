@@ -7,5 +7,4 @@
     marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item.nameshort }}"
   with_items:
   - { ip: 192.168.18.9, namelong: vg-foremansrv01.local, nameshort: vg-foremansrv01 }
-  - { ip: 192.168.18.10, namelong: vg-foremansrv02.local, nameshort: vg-foremansrv02 }  
   when: add_host_entries

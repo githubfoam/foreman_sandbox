@@ -1,0 +1,90 @@
+#!/usr/bin/env bash
+
+# global definitions
+TRUE=0
+FALSE=1
+DEBUG=${FALSE}
+OK=0
+KO=1
+
+function help {
+    echo "$0 OPTIONS"
+    echo
+    echo "OPTIONS:"
+    echo "   --help"
+    echo "   --verbose"
+}
+
+function debug {
+    if [ "${DEBUG}" -eq "${TRUE}" ]; then
+        echo "$@"
+    fi
+}
+
+# parse options (https://stackoverflow.com/questions/192249/how-do-i-parse-command-line-arguments-in-bash)
+POSITIONAL=()
+while [[ $# -gt 0 ]]
+do
+    key="$1"
+    case $key in
+        --help)
+            help
+            exit ${OK}
+            ;;
+        --debug)
+            DEBUG=${TRUE}
+            shift
+            ;;
+        *)
+            POSITIONAL+=("$1")
+            shift
+            ;;
+    esac
+done
+# restore positional parameters
+set -- "${POSITIONAL[@]}"
+
+{% raw %}
+# validate options
+if [ "${#POSITIONAL[@]}" -ne "0" ]; then
+    echo "unknown argument ${POSITIONAL[@]}"
+    exit ${KO}
+fi
+{% endraw %}
+
+BKPDIR="{{ foreman_backup_dir }}"
+if [ ! -d ${BKPDIR} ] ; then
+    mkdir -p ""${BKPDIR}
+fi
+
+BKPFILE="{{ ansible_fqdn }}.psql.$(date +%Y%m%d-%H%M%S)"
+BKPREGEX=$(echo ${BKPFILE} | cut -d '.' -f 2)
+BKPRETENTION={{ foreman_backup_retention_days }}
+
+debug -n "creating temporary backup directory ... "
+TMPDIR=$(mktemp -d -p ${BKPDIR})
+chown postgres ${TMPDIR}
+debug "OK"
+
+pushd ${TMPDIR} > /dev/null
+
+debug -n "backing up postgres to ${TMPDIR}/${BKPFILE} ..."
+sudo -u postgres /usr/bin/pg_basebackup -D ${TMPDIR}/${BKPFILE} -Ft -X stream -z
+debug "OK"
+
+debug -n "moving backup files to backup destination ..."
+mv ${TMPDIR}/${BKPFILE} ${BKPDIR}/.
+debug "OK"
+debug "mv ${TMPDIR}/${BKPFILE} ${BKPDIR}/"
+
+debug -n "cleaning up stale backup files ..."
+find ${BKPDIR} -name ${BKPREGEX} -mtime +${BKPRETENTION} -delete 1>&2 > /dev/null
+debug "OK"
+
+debug -n "cleaning up temporary files ..."
+popd ${TMPDIR} > /dev/null
+rm -rf ${TMPDIR}
+debug "OK"
+
+echo ${BKPDIR}/${BKPFILE}
+exit ${OK}

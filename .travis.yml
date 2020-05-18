@@ -181,7 +181,7 @@ matrix:
         - source ~venvpy2/bin/activate
       <<: *fleet_install_tasks
       <<: *fleet_script_tasks
-      # <<: *fleet_script_vagrant_tasks
+      <<: *fleet_script_vagrant_tasks
       after_success:
         - deactivate
 

@@ -1,0 +1,104 @@
+#!/usr/bin/env bash
+
+# global definitions
+TRUE=0
+FALSE=1
+DEBUG=${FALSE}
+OK=0
+KO=1
+
+function help {
+    echo "$0 OPTIONS <backup directory>"
+    echo
+    echo "OPTIONS:"
+    echo "   --help"
+    echo "   --verbose"
+}
+
+function debug {
+    if [ "${DEBUG}" -eq "${TRUE}" ]; then
+        echo "$@"
+    fi
+}
+
+# parse options (https://stackoverflow.com/questions/192249/how-do-i-parse-command-line-arguments-in-bash)
+POSITIONAL=()
+while [[ $# -gt 0 ]]
+do
+    key="$1"
+    case $key in
+        --help)
+            help
+            exit ${OK}
+            ;;
+        --debug)
+            DEBUG=${TRUE}
+            shift # past argument
+            ;;
+        *)    # unknown option
+            POSITIONAL+=("$1") # save it in an array for later
+            shift # past argument
+            ;;
+    esac
+done
+set -- "${POSITIONAL[@]}" # restore positional parameters
+
+{% raw %}
+# validate options
+if [ "${#POSITIONAL[@]}" -ne "1" ]; then
+    echo "missing required argument <backup directory>"
+    exit ${KO}
+fi
+{% endraw %}
+
+BKPTARGET=$1
+if [ ! -d ${BKPTARGET} ] ; then
+    echo "backup directory not found"
+    echo "make sure the path exists and is a directory"
+    exit ${KO}
+fi
+
+debug -n "taking rollback backup ... "
+NEW_BKP=$({{ foreman_backup_bin }})
+debug "${NEW_BKP}"
+
+debug -n "stopping postgresql ... "
+systemctl stop postgresql-{{ foreman_postgresql_release }}
+debug "OK"
+
+if [ ! -f "${BKPTARGET}/base.tar.gz" ] ; then
+    echo "File ${BKPTARGET}/base.tar.gz not found. Aborting"
+    echo "make sure the path exists and is a directory"
+    exit ${KO}
+fi
+
+debug -n "clearing postgresql data ... "
+pushd "{{ postgresql_data_dir }}" > /dev/null
+find ./  -delete
+debug "OK"
+
+debug -n "creating restore configuration ... "
+touch "{{ postgresql_data_dir }}/recovery.signal"
+chown postgres.postgres "{{ postgresql_data_dir }}/recovery.signal"
+debug "OK"
+
+debug -n "restoring postgresql data ... "
+tar xvzf "${BKPTARGET}/base.tar.gz"
+debug "OK"
+
+if [ ! -f "${BKPTARGET}/pg_wal.tar.gz" ] ; then
+    echo "File ${BKPTARGET}/pg_wal.tar.gz not found. Ignoring"
+else
+    debug -n "restoring wal data ... "
+    pushd pg_wal
+    tar xvzf "${BKPTARGET}/pg_wal.tar.gz"
+    popd
+    debug "OK"
+fi
+
+debug -n "starting postgresql ... "
+systemctl start postgresql-{{ foreman_postgresql_release }}
+debug "OK"
+
+popd > /dev/null
+exit ${OK}
