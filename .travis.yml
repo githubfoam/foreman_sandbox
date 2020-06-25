@@ -1,10 +1,5 @@
 ---
 sudo: required
-
-# env:
-#   global:
-#   - VAGRANT_VERSION="2.2.9"
-
 notifications:
   slack:
     on_failure: always
@@ -13,7 +8,7 @@ matrix:
   fast_finish: true
   include:
 
-    - name: "Python 3.7 on bionic amd64"
+    - name: "build Vagrant and Libvirt with KVM or QEMU - bionic"
       dist: bionic
       language: python
       python: 3.7
