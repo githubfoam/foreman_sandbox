@@ -30,7 +30,7 @@ Vagrant.configure(2) do |config|
                     vb.name = "vbox-foreman.linuxsysadmins"
                     vb.memory = "4096"
                 end
-                k8scluster.vm.provision :shell, path: "provisioning/bootstrap_foreman.sh"
+                k8scluster.vm.provision :shell, path: "provisioning/bootstrap_katello.sh"
               end              
 
              config.vm.define "spacewalk-client01" do |k8scluster|
