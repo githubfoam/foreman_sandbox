@@ -10,4 +10,4 @@
   - { ip: 192.168.18.10, namelong: vg-foremansrv02.local, nameshort: vg-foremansrv02 }
   - { ip: 192.168.18.11, namelong: vg-foremansrv03.local, nameshort: vg-foremansrv03 }
   - { ip: 192.168.18.12, namelong: vg-foremansrv04.local, nameshort: vg-foremansrv04 }  
-  when: add_host_entries
+  # when: add_host_entries
