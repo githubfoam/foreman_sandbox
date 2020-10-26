@@ -99,7 +99,7 @@ cat /etc/foreman-installer/scenarios.d/katello.yaml
 
 # Start the foreman installer to set up the katello
 # If the option --scenario katello not used, it will set up with the puppet
-foreman-installer --scenario katello --foreman-initial-admin-username admin --foreman-initial-admin-password 'katellopassword'
+# foreman-installer --scenario katello --foreman-initial-admin-username admin --foreman-initial-admin-password 'katellopassword'
 
 
 
@@ -248,3 +248,27 @@ foreman-installer --scenario katello --foreman-initial-admin-username admin --fo
 # hammer activation-key add-subscription --organization-id 1 --name "CentOS7_Dev" --quantity "1" --subscription-id "1"
 # hammer activation-key add-subscription --organization-id 1 --name "CentOS7_Tst" --quantity "1" --subscription-id "1"
 # hammer activation-key add-subscription --organization-id 1 --name "CentOS7_Prod" --quantity "1" --subscription-id "1"
+
+# Register a Linux client with Foreman
+
+# To subscribe a CentOS server with foreman 
+# get the subscription-manager package from the default CentOS repository.
+# yum install subscription-manager -yq
+
+# Getting Pre-built bootstrap RPM
+# Register the Linux client (content host) to the foreman/Katello, 
+# Install the pre-built bootstrap RPM from the foreman server
+# During the foreman installation, 
+# these packages will be saved under /var/www/html/pub/
+# Get the package using curl in the client
+# curl --insecure --output katello-ca-consumer-latest.noarch.rpm https://foreman.linuxsysadmins.local/pub/katello-ca-consumer-latest.noarch.rpm
+
+# Install Pre-built bootstrap RPM
+# Install the downloaded package using yum on the Linux client.
+# yum localinstall katello-ca-consumer-latest.noarch.rpm -y
+
+# modify the rhsm configuration file /etc/rhsm/rhsm.conf with foreman server details
+# The server CA certificate will be under /etc/rhsm/ca/
+# ls -lthr /etc/rhsm/ca/katello-*
+
+# Register Linux Client using Activation Key
