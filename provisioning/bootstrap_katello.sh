@@ -51,7 +51,8 @@ systemctl restart firewalld
 
 # adding the ports for katello patch management
 firewall-cmd --add-port={53,80,443,5647,9090}/tcp --permanent
-firewall-cmd --add-port="67-69,53/udp" --permanent
+# firewall-cmd --add-port="67-69,53/udp" --permanent
+firewall-cmd --add-port={67-69,53}/udp --permanent
 firewall-cmd --add-port="53/udp" --permanent
 firewall-cmd --reload
 firewall-cmd --list-all
