@@ -1,6 +1,9 @@
 IMAGE := alpine/fio
 APP:="app/deploy-openesb.sh"
 
+deploy-topology-cobbler:
+	bash scripts/deploy-topology-cobbler.sh
+
 deploy-topology-katello:
 	bash scripts/deploy-topology-katello.sh
 
