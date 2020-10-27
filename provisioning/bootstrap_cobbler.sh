@@ -6,7 +6,7 @@ set -o xtrace
 # set -eox pipefail #safety for script
 
 hostnamectl set-hostname cobbler-server
-echo "192.168.1.20 cobbler-server.local cobbler-server" |sudo tee -a /etc/hosts
+echo "192.168.50.22 cobbler-server.local cobbler-server" |sudo tee -a /etc/hosts
 cat /etc/hosts
 
 echo "nameserver 8.8.8.8" |sudo tee -a /etc/resolv.conf
