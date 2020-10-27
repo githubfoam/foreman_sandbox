@@ -59,7 +59,7 @@ matrix:
       script:
         - sudo make deploy-vagrant
         - sudo make deploy-libvirt
-        - sudo make deploy-topology-cobbler
+        - sudo make deploy-topology-opennebula
       after_success:
         - deactivate
         - sudo vagrant destroy -f # required to run Vagrantfile template        
