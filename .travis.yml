@@ -46,11 +46,11 @@ matrix:
     #     - sudo vagrant destroy -f # required to run Vagrantfile template        
     #     - sudo rm Vagrantfile # required to run Vagrantfile template           
 
-    - name: "build yocto image Python 3.7 on yocto amd64 trusty"
+    - name: "build yocto image Python on yocto amd64 trusty"
       dist: trusty
       arch: amd64
       language: python
-      python: 3.7
+      # python: 3.7
       before_install:
         - pip3 install virtualenv
         - virtualenv -p $(which python3) ~venvpy3
