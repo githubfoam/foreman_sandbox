@@ -72,4 +72,16 @@ tmp/deploy/sdk/fslc-x11-glibc-x86_64-meta-toolchain-armv7at2hf-neon-toolchain-2.
 # you need to source the environment setup script
 source /opt/fslc-x11/2.2.1/environment-setup-armv7at2hf-neon-fslc-linux-gnueabi
 
+echo "============================Sample C Hello, world program=============================================================="
+
+# Full Yocto OpenEmbedded environment is required for this tutorial
+# https://variwiki.com/index.php?title=Yocto_Hello_World
+
+# 3 Building out of Yocto
+# 3.1 Toolchain installation for out of Yocto builds
+# 3.2 Build
+# Now you should have an app called myhello, 
+# that can be copied (using scp, for example) and run on your target board
+CC myhello.c -o myhello
+
 echo "============================build yocto latest revision toolchain=============================================================="

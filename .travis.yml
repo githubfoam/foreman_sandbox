@@ -58,6 +58,7 @@ matrix:
         - pip install -r requirements.txt
       script:
         - sudo make deploy-yocto-latest-sdk
+        - sudo make building-using-yocto
       after_success:
         - deactivate
 
@@ -73,6 +74,7 @@ matrix:
         - pip install -r requirements.txt
       script:
         - sudo make deploy-yocto-latest-toolchain
+        - sudo make building-out-of-yocto
       after_success:
         - deactivate
 
@@ -88,6 +90,7 @@ matrix:
         - pip install -r requirements.txt
       script:
         - sudo make deploy-yocto-toolchain
+        - sudo make building-out-of-yocto
       after_success:
         - deactivate
 
@@ -103,6 +106,7 @@ matrix:
         - pip install -r requirements.txt
       script:
         - sudo make deploy-yocto-sdk
+        - sudo make building-using-yocto
       after_success:
         - deactivate
 
