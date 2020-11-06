@@ -1,6 +1,9 @@
 IMAGE := alpine/fio
 APP:="app/deploy-openesb.sh"
 
+deploy-yocto-latest:
+	bash deploy-yocto-latest.sh
+
 deploy-yocto:
 	bash deploy-yocto.sh
 

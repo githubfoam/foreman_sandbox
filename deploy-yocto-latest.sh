@@ -31,6 +31,7 @@ libncurses5 libncurses5-dev libncursesw5-dev libelf-dev zlib1g-dev bc
 git config --global user.name "githubfoam"
 # git config --global user.email "githubfoam@githubfoam.com"
 
+
 # mkdir: cannot create directory ‘/home/travis/bin’: File exists
 # mkdir ~/bin #(this step may not be needed if the bin folder already exists)
 curl http://commondatastorage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
@@ -42,10 +43,7 @@ cd ~/var-fslc-yocto
 
 #choose between downloading a release tag, and downloading the latest revision (recommended) 
 
-# Download a release tag
-# Each release in https://github.com/varigit/variscite-bsp-platform/releases corresponds to a tag.
-# The tags are also listed in https://github.com/varigit/variscite-bsp-platform/tags
-repo init -u https://github.com/varigit/variscite-bsp-platform.git -b refs/tags/morty-fslc-4.1.15-mx6ul-v1.0-beta
+# Download the latest revision (recommended)
+repo init -u https://github.com/varigit/variscite-bsp-platform.git -b morty
 repo sync -j4
-
 echo "============================build yocto=============================================================="
