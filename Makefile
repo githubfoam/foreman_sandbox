@@ -1,6 +1,9 @@
 IMAGE := alpine/fio
 APP:="app/deploy-openesb.sh"
 
+deploy-yocto:
+	bash deploy-yocto.sh
+
 deploy-topology-opennebula:
 	bash scripts/deploy-topology-opennebula.sh
 
