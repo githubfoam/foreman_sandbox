@@ -46,6 +46,21 @@ matrix:
     #     - sudo vagrant destroy -f # required to run Vagrantfile template        
     #     - sudo rm Vagrantfile # required to run Vagrantfile template           
 
+    - name: "create your own Linux Distribution with Yocto  on amd64 xenial"
+      dist: xenial
+      arch: amd64
+      language: python
+      # python: 3.7
+      before_install:
+        - pip3 install virtualenv
+        - virtualenv -p $(which python3) ~venvpy3
+        - source ~venvpy3/bin/activate
+        - pip install -r requirements.txt
+      script:
+        - sudo make deploy-yocto-xenial
+      after_success:
+        - deactivate
+
     - name: "build yocto latest revision sdk Python on yocto amd64 trusty"
       dist: trusty
       arch: amd64
