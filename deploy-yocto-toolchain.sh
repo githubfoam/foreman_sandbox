@@ -6,7 +6,7 @@ set -o xtrace
 # set -eox pipefail #safety for script
 
 # https://variwiki.com/index.php?title=Yocto_Hello_World
-echo "============================build yocto=============================================================="
+echo "============================build yocto release tag toolchain=============================================================="
 
 # Yocto toolchain installation for out of Yocto builds
 # https://variwiki.com/index.php?title=Yocto_Toolchain_installation&release=RELEASE_MORTY_BETA_DART-6UL
@@ -48,4 +48,29 @@ cd ~/var-fslc-yocto
 repo init -u https://github.com/varigit/variscite-bsp-platform.git -b refs/tags/morty-fslc-4.1.15-mx6ul-v1.0-beta
 repo sync -j4
 
-echo "============================build yocto=============================================================="
+# Yocto toolchain installation for out of Yocto builds
+# https://variwiki.com/index.php?title=Yocto_Toolchain_installation&release=RELEASE_MORTY_BETA_DART-6UL
+# To setup a Yocto build environment follow steps 1 & 3 of the Build Yocto from source code guide 
+# and then proceed to either the toolchain or complete SDK steps below
+
+# 2. Build a toolchain
+cd ~/var-fslc-yocto
+MACHINE=imx6ul-var-dart DISTRO=fslc-x11 . setup-environment build_x11
+
+bitbake meta-ide-support
+bitbake meta-toolchain
+
+# 4. Install the toolchain/SDK
+# Install the tools by running the resulted script in tmp/deploy/sdk/.
+# The toolchain/script name depends on your build machine 
+# and the bitbaked image/recipe, and may change
+# Accept all the default options, and at the end of the installation you should see the following
+# SDK has been successfully set up and is ready to be used.
+tmp/deploy/sdk/fslc-x11-glibc-x86_64-meta-toolchain-armv7at2hf-neon-toolchain-2.2.1.sh
+
+# 5. Use the toolchain/SDK
+# Each time you wish to use the toolchain in a new shell session, 
+# you need to source the environment setup script
+source /opt/fslc-x11/2.2.1/environment-setup-armv7at2hf-neon-fslc-linux-gnueabi
+
+echo "============================build yocto release tag toolchain=============================================================="
