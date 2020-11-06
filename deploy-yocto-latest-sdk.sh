@@ -41,7 +41,10 @@ cd ~/var-fslc-yocto
 #choose between downloading a release tag, and downloading the latest revision (recommended) 
 
 # Download the latest revision (recommended)
-repo init -u https://github.com/varigit/variscite-bsp-platform.git -b morty
+# repo init -u https://github.com/varigit/variscite-bsp-platform.git -b morty
+
+# Enable color display in this user account (y/N)? 
+yes | repo init -u https://github.com/varigit/variscite-bsp-platform.git -b morty
 repo sync -j4
 
 # Yocto toolchain installation for out of Yocto builds

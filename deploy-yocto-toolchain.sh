@@ -45,7 +45,10 @@ cd ~/var-fslc-yocto
 # Download a release tag
 # Each release in https://github.com/varigit/variscite-bsp-platform/releases corresponds to a tag.
 # The tags are also listed in https://github.com/varigit/variscite-bsp-platform/tags
-repo init -u https://github.com/varigit/variscite-bsp-platform.git -b refs/tags/morty-fslc-4.1.15-mx6ul-v1.0-beta
+# repo init -u https://github.com/varigit/variscite-bsp-platform.git -b refs/tags/morty-fslc-4.1.15-mx6ul-v1.0-beta
+
+# Enable color display in this user account (y/N)?     
+yes | repo init -u https://github.com/varigit/variscite-bsp-platform.git -b refs/tags/morty-fslc-4.1.15-mx6ul-v1.0-beta
 repo sync -j4
 
 # Yocto toolchain installation for out of Yocto builds
