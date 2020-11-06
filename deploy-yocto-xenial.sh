@@ -43,4 +43,9 @@ git clone -b morty git://git.yoctoproject.org/poky.git
 # EXTRA_IMAGE_FEATURES ?= "debug-tweaks"
 # not using any GUI tool such as toaster (hob is no more supported) to create Linux OS
 
-Yocto Compilation and Building Process
+
+# Yocto Compilation and Building Process
+# run the following command of the bitbake utility to start the download 
+# and compilation of packages for the selected target machine.
+# as a normal Linux user and not the root user
+# bitbake core-image-minimal
