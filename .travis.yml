@@ -27,119 +27,40 @@ matrix:
     #     - sudo vagrant destroy -f # required to run Vagrantfile template        
     #     - sudo rm Vagrantfile # required to run Vagrantfile template        
 
-    # - name: "cobbler topology provision bash Python 3.7 on bionic amd64"
-    #   dist: bionic
-    #   arch: amd64
-    #   language: python
-    #   python: 3.7
-    #   before_install:
-    #     - pip3 install virtualenv
-    #     - virtualenv -p $(which python3) ~venvpy3
-    #     - source ~venvpy3/bin/activate
-    #     - pip install -r requirements.txt
-    #   script:
-    #     - sudo make deploy-vagrant
-    #     - sudo make deploy-libvirt
-    #     - sudo make deploy-topology-cobbler
-    #   after_success:
-    #     - deactivate
-    #     - sudo vagrant destroy -f # required to run Vagrantfile template        
-    #     - sudo rm Vagrantfile # required to run Vagrantfile template           
-
-    - name: "create your own Linux Distribution with Yocto  on amd64 xenial"
-      dist: xenial
+    - name: "cobbler topology provision bash Python 3.7 on bionic amd64"
+      dist: bionic
       arch: amd64
       language: python
-      # python: 3.7
+      python: 3.7
       before_install:
         - pip3 install virtualenv
         - virtualenv -p $(which python3) ~venvpy3
         - source ~venvpy3/bin/activate
         - pip install -r requirements.txt
       script:
-        - sudo make deploy-yocto-xenial
+        - sudo make deploy-vagrant
+        - sudo make deploy-libvirt
+        - sudo make deploy-topology-cobbler
       after_success:
         - deactivate
+        - sudo vagrant destroy -f # required to run Vagrantfile template        
+        - sudo rm Vagrantfile # required to run Vagrantfile template           
 
-    - name: "build yocto latest revision sdk Python on yocto amd64 trusty"
-      dist: trusty
+    - name: "opennebula topology provision bash Python 3.7 on bionic amd64"
+      dist: bionic
       arch: amd64
       language: python
-      # python: 3.7
+      python: 3.7
       before_install:
         - pip3 install virtualenv
         - virtualenv -p $(which python3) ~venvpy3
         - source ~venvpy3/bin/activate
         - pip install -r requirements.txt
       script:
-        - sudo make deploy-yocto-latest-sdk
-        - sudo make building-using-yocto
+        - sudo make deploy-vagrant
+        - sudo make deploy-libvirt
+        - sudo make deploy-topology-opennebula
       after_success:
         - deactivate
-
-    - name: "build yocto latest revision toolchain Python on yocto amd64 trusty"
-      dist: trusty
-      arch: amd64
-      language: python
-      # python: 3.7
-      before_install:
-        - pip3 install virtualenv
-        - virtualenv -p $(which python3) ~venvpy3
-        - source ~venvpy3/bin/activate
-        - pip install -r requirements.txt
-      script:
-        - sudo make deploy-yocto-latest-toolchain
-        - sudo make building-out-of-yocto
-      after_success:
-        - deactivate
-
-    - name: "build yocto release tag toolchain Python on yocto amd64 trusty"
-      dist: trusty
-      arch: amd64
-      language: python
-      # python: 3.7
-      before_install:
-        - pip3 install virtualenv
-        - virtualenv -p $(which python3) ~venvpy3
-        - source ~venvpy3/bin/activate
-        - pip install -r requirements.txt
-      script:
-        - sudo make deploy-yocto-toolchain
-        - sudo make building-out-of-yocto
-      after_success:
-        - deactivate
-
-    - name: "build yocto release tag sdk Python on yocto amd64 trusty"
-      dist: trusty
-      arch: amd64
-      language: python
-      # python: 3.7
-      before_install:
-        - pip3 install virtualenv
-        - virtualenv -p $(which python3) ~venvpy3
-        - source ~venvpy3/bin/activate
-        - pip install -r requirements.txt
-      script:
-        - sudo make deploy-yocto-sdk
-        - sudo make building-using-yocto
-      after_success:
-        - deactivate
-
-    # - name: "opennebula topology provision bash Python 3.7 on bionic amd64"
-    #   dist: bionic
-    #   arch: amd64
-    #   language: python
-    #   python: 3.7
-    #   before_install:
-    #     - pip3 install virtualenv
-    #     - virtualenv -p $(which python3) ~venvpy3
-    #     - source ~venvpy3/bin/activate
-    #     - pip install -r requirements.txt
-    #   script:
-    #     - sudo make deploy-vagrant
-    #     - sudo make deploy-libvirt
-    #     - sudo make deploy-topology-opennebula
-    #   after_success:
-    #     - deactivate
-    #     - sudo vagrant destroy -f # required to run Vagrantfile template        
-    #     - sudo rm Vagrantfile # required to run Vagrantfile template          
+        - sudo vagrant destroy -f # required to run Vagrantfile template        
+        - sudo rm Vagrantfile # required to run Vagrantfile template          
